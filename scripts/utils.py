@@ -15,5 +15,9 @@ def create_folder(filePath):
 
 
 def clean_name(name):
+    return name.replace("-", ",")
+
+
+def remove_parentesis(name):
     pattern = re.compile(r"\((?!.*?\bremix\b).*?\)", re.IGNORECASE)
     return pattern.sub("", name).strip()

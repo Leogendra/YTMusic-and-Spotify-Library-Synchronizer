@@ -1,4 +1,4 @@
-from scripts.utils import clean_name, write_to_file
+from scripts.utils import write_to_file, remove_parentesis, clean_name
 from ytmusicapi import YTMusic
 import json
 
@@ -50,17 +50,19 @@ class YTMusicManager:
         """
         Returns a list of (tuples) songs to add to YTMusic: (title, artist)
         """
+        all_songs = []
         songs_to_add = []
 
         for trackSpotify in spotify_songs:
-            titleSpotify = clean_name(trackSpotify["track"]["name"]).lower()
-            artistSpotify = trackSpotify["track"]["artists"][0]["name"].lower()
+            titleSpotify = clean_name(remove_parentesis(trackSpotify["track"]["name"]).lower())
+            artistSpotify = clean_name(trackSpotify["track"]["artists"][0]["name"].lower())
+            all_songs.append((titleSpotify, artistSpotify))
 
             if ((titleSpotify, artistSpotify) not in songs_to_add):
                 # Check if the song is already liked on YTMusic
                 isNotLiked = True
                 for trackYT in ytmusic_songs:
-                    titleYT = clean_name(trackYT["title"]).lower()
+                    titleYT = remove_parentesis(trackYT["title"]).lower()
                     artistYT = trackYT["artists"][0]["name"].lower()
 
                     if (titleSpotify == titleYT) and (artistSpotify == artistYT):
@@ -69,6 +71,8 @@ class YTMusicManager:
 
                 if isNotLiked:
                     songs_to_add.append((titleSpotify, artistSpotify))
+
+        write_to_file("data/titles_ytmusic.txt", all_songs)
 
         return songs_to_add
 
@@ -95,7 +99,7 @@ class YTMusicManager:
                 not_found.append(song)
                 print(f"{RED}Not found{RESET}")
 
-        confirm = input("Enter to add to YTMusic")
+        confirm = input("Press enter to add to YTMusic: ")
         if feedback_tokens and (confirm == ""):
             self.ytmusic.edit_song_library_status(feedbackTokens=feedback_tokens)
             print(f"{len(feedback_tokens)} songs added to YTMusic.")

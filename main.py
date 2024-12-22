@@ -33,23 +33,51 @@ if __name__ == "__main__":
     print("1. Synchronise Spotify -> YTMusic")
     print("2. Synchronise YTMusic -> Spotify")
     print("3. Synchronise both")
+    
     choice = input("Enter your choice: ")
-    if choice not in ["1", "2", "3"]:
+    if (choice not in ["1", "2", "3"]):
         print("Invalid choice.")
         exit(0)
 
     print()
-    if (choice == "1") or (choice == "3"):
+    if (choice in ["1", "3"]):
         toYTMusic = True
 
-    if (choice == "2") or (choice == "3"):
+    if (choice in ["2", "3"]):
         toSpotify = True
 
-    print("Fetching library songs from YTMusic...")
-    ytmusic_library_songs = ytmusic.get_library_songs()
+    print("\nChoose an option:")
+    print("1. Retrieve from your librairies/likes")
+    print(f"2. Use the {UNDERLINED}add_to_spotify.txt{RESET} and {UNDERLINED}add_to_ytmusic.txt{RESET} files")
+    
+    choice = input("Enter your choice: ")
+    if (choice not in ["1", "2"]):
+        print("Invalid choice.")
+        exit(0)
 
-    print("Fetching liked songs from Spotify...")
-    spotify_liked_songs = spotify.get_liked_songs()
+    print()
+    if (choice == "1"):
+        print("Fetching library songs from YTMusic...")
+        ytmusic_library_songs = ytmusic.get_library_songs()
+
+        print("Fetching liked songs from Spotify...")
+        spotify_liked_songs = spotify.get_liked_songs()
+
+    if (choice == "2"):
+        print(f"Reading from {UNDERLINED}add_to_ytmusic.txt{RESET} and {UNDERLINED}add_to_spotify.txt{RESET} files...")
+        ytmusic_library_songs = []
+        spotify_liked_songs = []
+
+        with open("data/add_to_ytmusic.txt", "r", encoding="utf-8") as file:
+            for line in file:
+                title, artist = line.strip().split(" - ")
+                ytmusic_library_songs.append((title, artist))
+
+        with open("data/add_to_spotify.txt", "r", encoding="utf-8") as file:
+            for line in file:
+                title, artist = line.strip().split(" - ")
+                spotify_liked_songs.append((title, artist))
+
 
     ytmusic_to_add = ytmusic.get_music_to_add(ytmusic_library_songs, spotify_liked_songs)
     spotify_to_add = spotify.get_music_to_add(spotify_liked_songs, ytmusic_library_songs)

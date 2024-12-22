@@ -1,4 +1,4 @@
-from scripts.utils import clean_name, write_to_file
+from scripts.utils import write_to_file, remove_parentesis, clean_name
 import urllib.parse
 import requests
 import base64
@@ -98,17 +98,19 @@ class SpotifyManager:
         """
         Returns a list of (tuples) songs to add to Spotify: (title, artist)
         """
+        all_songs = []
         songs_to_add = []
 
         for trackYT in ytmusic_songs:
-            titleYT = clean_name(trackYT["title"]).lower()
-            artistYT = trackYT["artists"][0]["name"].lower()
+            titleYT = clean_name(remove_parentesis(trackYT["title"]).lower())
+            artistYT = clean_name(trackYT["artists"][0]["name"].lower())
+            all_songs.append((titleYT, artistYT))
 
             if ((titleYT, artistYT) not in songs_to_add):
                 # Check if the song is already liked on YTMusic
                 isNotLiked = True
                 for trackSpotify in spotify_songs:
-                    titleSpotify = clean_name(trackSpotify["track"]["name"]).lower()
+                    titleSpotify = remove_parentesis(trackSpotify["track"]["name"]).lower()
                     artistSpotify = trackSpotify["track"]["artists"][0]["name"].lower()
 
                     if (titleSpotify == titleYT) and (artistSpotify == artistYT):
@@ -117,6 +119,8 @@ class SpotifyManager:
 
                 if isNotLiked:
                     songs_to_add.append((titleYT, artistYT))
+        
+        write_to_file("data/titles_spotify.txt", all_songs)
 
         return songs_to_add
     
@@ -169,7 +173,7 @@ class SpotifyManager:
                 print(f"{RED}Not found{RESET}")
                 not_found.append(song)
 
-        confirm = input("Enter to add to Spotify")
+        confirm = input("Press enter to add to Spotify: ")
         if found_songs and (confirm == ""):
             for i in range(0, len(found_songs), 50):
                 self.like_songs_on_spotify(found_songs[i:i+50])
