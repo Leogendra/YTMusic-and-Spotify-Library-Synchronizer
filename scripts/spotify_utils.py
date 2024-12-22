@@ -67,7 +67,7 @@ class SpotifyManager:
             self.token = response.json()["access_token"]
             token = {
                 "token": self.token,
-                "validity": time.time() + 24*3600,
+                "validity": time.time() + 3600,
             }
             with open("tokens/spotify_token.json", "w", encoding="utf-8") as file:
                 json.dump(token, file)
