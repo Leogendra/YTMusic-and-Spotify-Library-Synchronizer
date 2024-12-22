@@ -1,0 +1,8 @@
+# Env
+__pycache__/
+venv*/
+
+# Private
+tokens/
+data/
+.env
