@@ -1,4 +1,4 @@
-from scripts.utils import write_to_file, remove_parentesis, clean_name
+from scripts.utils import write_to_file, remove_parentesis, clean_name, are_strings_similar
 import urllib.parse
 import requests
 import base64
@@ -63,7 +63,7 @@ class SpotifyManager:
             "https://accounts.spotify.com/api/token", headers=headers, data=data
         )
 
-        if response.status_code == 200:
+        if (response.status_code == 200):
             self.token = response.json()["access_token"]
             token = {
                 "token": self.token,
@@ -80,18 +80,30 @@ class SpotifyManager:
         url = "https://api.spotify.com/v1/me/tracks"
         headers = {"Authorization": f"Bearer {self.token}"}
         liked_songs = []
+        seen = set()
 
         while url:
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 data = response.json()
-                liked_songs.extend(data["items"])
+                for song in data["items"]:
+                    name = song["track"]["name"]
+                    artists = [artist["name"] for artist in song["track"]["artists"]]
+                    key = (name, tuple(artists))
+
+                    if (key not in seen):
+                        seen.add(key)
+                        liked_songs.append({
+                            "name": name,
+                            "artists": artists,
+                        })
                 url = data.get("next")
             else:
                 print(f"Error while fetching liked songs: {response.status_code}")
                 break
 
         return liked_songs
+
     
 
     def get_music_to_add(self, spotify_songs, ytmusic_songs):
@@ -102,25 +114,25 @@ class SpotifyManager:
         songs_to_add = []
 
         for trackYT in ytmusic_songs:
-            titleYT = clean_name(remove_parentesis(trackYT["title"]).lower())
-            artistYT = clean_name(trackYT["artists"][0]["name"].lower())
-            all_songs.append((titleYT, artistYT))
+            titleYT = clean_name(remove_parentesis(trackYT["name"]).lower())
+            artists_YT = [clean_name(artist.lower()) for artist in trackYT["artists"]]
+            all_songs.append((titleYT, ", ".join(artists_YT)))
 
-            if ((titleYT, artistYT) not in songs_to_add):
+            if ((titleYT, artists_YT) not in songs_to_add):
                 # Check if the song is already liked on YTMusic
                 isNotLiked = True
                 for trackSpotify in spotify_songs:
-                    titleSpotify = remove_parentesis(trackSpotify["track"]["name"]).lower()
-                    artistSpotify = trackSpotify["track"]["artists"][0]["name"].lower()
+                    titleSpotify = clean_name(remove_parentesis(trackSpotify["name"]).lower())
+                    artists_spotify = [clean_name(artist.lower()) for artist in trackSpotify["artists"]]
 
-                    if (titleSpotify == titleYT) and (artistSpotify == artistYT):
+                    if are_strings_similar(f"{titleSpotify} - {' '.join(artists_spotify)}".lower(), f"{titleYT} - {' '.join(artists_YT)}".lower()):
                         isNotLiked = False
                         break
 
-                if isNotLiked:
-                    songs_to_add.append((titleYT, artistYT))
+                if (isNotLiked):
+                    songs_to_add.append((titleYT, artists_YT))
         
-        write_to_file("data/titles_spotify.txt", all_songs)
+        write_to_file("data/tracks_ytmusic.txt", all_songs)
 
         return songs_to_add
     
@@ -132,9 +144,9 @@ class SpotifyManager:
 
         try:
             response = requests.get(url, headers=headers)
-            if response.status_code == 200:
+            if (response.status_code == 200):
                 results = response.json().get("tracks", {}).get("items", [])
-                if results:
+                if (results):
                     return results[0]["id"]
                 
         except Exception as e:
@@ -152,7 +164,7 @@ class SpotifyManager:
         data = json.dumps({"ids": track_ids})
 
         response = requests.put(url, headers=headers, data=data)
-        if response.status_code == 200:
+        if (response.status_code == 200):
             print(f"{len(track_ids)} songs liked on Spotify.")
         else:
             print(f"Error while liking song on Spotify: {response.status_code}")
@@ -163,9 +175,9 @@ class SpotifyManager:
         found_songs = []
 
         for i, song in enumerate(liked_songs):
-            trackName, artistName = song
-            print(f"[Spotify] {i+1}/{len(liked_songs)}: {trackName} - {artistName}", end=" ")
-            track_id = self.search_on_spotify(trackName, artistName)
+            trackName, track_artists = song
+            print(f"[Spotify] {i+1}/{len(liked_songs)}: {trackName} - {track_artists[0]}", end=" ")
+            track_id = self.search_on_spotify(trackName, track_artists[0])
             if track_id:
                 print(f"{GREEN}Found!{RESET}")
                 found_songs.append(track_id)
@@ -174,9 +186,9 @@ class SpotifyManager:
                 not_found.append(song)
 
         confirm = input("Press enter to add to Spotify: ")
-        if found_songs and (confirm == ""):
+        if (found_songs and (confirm == "")):
             for i in range(0, len(found_songs), 50):
                 self.like_songs_on_spotify(found_songs[i:i+50])
 
-        if not_found:
+        if (not_found):
             write_to_file("data/not_found_spotify.txt", not_found)

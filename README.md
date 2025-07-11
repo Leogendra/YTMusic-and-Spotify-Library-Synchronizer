@@ -29,9 +29,9 @@ Due to the independent nature of the APIs used, the search functionality may not
 
 1. To obtain your Cookie and Authorization, go to `https://music.youtube.com/` and log in with your account. Then press `F12` to open the Developer Tools, go to the `Network` tab, and filter (at the top) with `/browse`. Refresh the page and look for the `browse?ctoken=` request, click on it, and go to the `Request headers` section, and copy your `Cookie` and `Authorization` values into the `browser.json` file.
 
-1. Run the script `python main.py` again to connetc to your Spotify account.
+1. Run the script `python main.py` again to connect to your Spotify account.
 
-1. An URL is generated. Open the URL in your browser, copy the code after `?code=`, and paste it into the terminal. This token is valid for 1 hour.
+1. An URL is generated. Open the URL in your browser, it should redirect you to another URL starting with `http://localhost:5500/callback?code=`. Copy the code after `?code=`, and paste it into the terminal. This token is valid for 1 hour.
 
 1. You are now ready to (finally) use the synchronizer!
 
@@ -49,18 +49,22 @@ Due to the independent nature of the APIs used, the search functionality may not
         - **1**: Sync Spotify likes to YTMusic library
         - **2**: Sync YTMusic library to Spotify likes
         - **3**: Sync in both directions.
-    - Missing songs will be added to the target platform. It will first search for the song by title and artist, and after all songs are processed, you will be asked to confirm the changes. Press `enter` to confirm, or anything else to cancel.
 
     - Choose an option for retrieving the liked songs:
         - **1**: Retrieve songs from Spotify/YTMusic likes/library.
-        - **3**: Retrieve songs from `add_to_spotify.txt`/`add_to_ytmusic.txt` files.
+        - **2**: Retrieve songs from `add_to_spotify.txt`/`add_to_ytmusic.txt` files.
+  
+    - Missing songs will be added to the target platform. It will first search for the song by title and artist, and after all songs are processed, you will be asked to confirm the changes. Press `enter` to confirm, or anything else to cancel and review the tracks in the `data/add_to_spotify.txt` or `data/add_to_ytmusic.txt` files.
 
-1. **Generated files:**
-    - `data/titles_spotify.txt`: List of liked songs on Spotify.
-    - `data/titles_ytmusic.txt`: List of songs in your YouTube Music library.
-    - `data/add_to_spotify.txt`: List of songs to be added to Spotify.
-    - `data/add_to_ytmusic.txt`: List of songs to be added to YouTube Music.
+2. **Generated files:**
+    - `data/tracks_*.txt`: List of liked songs on Spotify / YTMusic.
+    - `data/add_to_*.txt`: List of songs to be added to each platform.
     - `data/not_found_*.txt`: List of songs not found on each platform.
+  
+    By default, tracks are ordered by added date. If you want to sort the songs alphabetically, set the environment variable `SORT_ALPHABETICALLY` to `true` in the `.env` file.
+    ```env
+    SORT_ALPHABETICALLY=true
+    ```
 
 ---
 
