@@ -1,3 +1,4 @@
 ytmusicapi
 requests
 python-dotenv
+rapidfuzz
