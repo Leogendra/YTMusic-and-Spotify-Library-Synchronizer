@@ -3,8 +3,7 @@
 **YTMusic and Spotify Library Synchronizer** is a tool that allows you to sync your liked songs between Spotify and YouTube Music. It supports synchronization in both directions and automatically checks for duplicates.
 
 ## Disclaimer
-This project is based on the [ytmusicapi](https://ytmusicapi.readthedocs.io/) and [Spotify Web API](https://developer.spotify.com/documentation/web-api).  
-Due to the independent nature of the APIs used, the search functionality may not always be accurate. As a result, some songs might not be found or added during synchronization.
+This project is based on the [ytmusicapi](https://ytmusicapi.readthedocs.io/) and [Spotify Web API](https://developer.spotify.com/documentation/web-api).  Due to the independent nature of the APIs used, the search functionality may not always be accurate. As a result, some songs might not be found or added during synchronization.
 
 ## **Installation and setup**
 
@@ -33,7 +32,7 @@ Due to the independent nature of the APIs used, the search functionality may not
 
 1. An URL is generated. Open the URL in your browser, it should redirect you to another URL starting with `http://localhost:5500/callback?code=`. Copy the code after `?code=`, and paste it into the terminal. This token is valid for 1 hour.
 
-1. You are now ready to (finally) use the synchronizer!
+1. You are now ready to use the synchronizer!
 
 ---
 
@@ -56,7 +55,7 @@ Due to the independent nature of the APIs used, the search functionality may not
   
     - Missing songs will be added to the target platform. It will first search for the song by title and artist, and after all songs are processed, you will be asked to confirm the changes. Press `enter` to confirm, or anything else to cancel and review the tracks in the `data/add_to_spotify.txt` or `data/add_to_ytmusic.txt` files.
 
-2. **Generated files:**
+1. **Generated files:**
     - `data/tracks_*.txt`: List of liked songs on Spotify / YTMusic.
     - `data/add_to_*.txt`: List of songs to be added to each platform.
     - `data/not_found_*.txt`: List of songs not found on each platform.
